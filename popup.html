@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coursera Autopilot</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --panel: #111118;
+    --border: #1e1e2e;
+    --accent: #7fff6e;
+    --accent2: #4fffef;
+    --muted: #3a3a52;
+    --text: #e2e2f0;
+    --text-dim: #7777a0;
+    --danger: #ff5f7e;
+    --glow: rgba(127,255,110,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 300px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 0%, rgba(127,255,110,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .logo {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px var(--glow);
+  }
+  .title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff;
+  }
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .status-pill {
+    margin-left: auto;
+    padding: 3px 8px;
+    border-radius: 99px;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    transition: all 0.3s;
+  }
+  .status-pill.on  { background: rgba(127,255,110,0.15); color: var(--accent); border: 1px solid rgba(127,255,110,0.3); }
+  .status-pill.off { background: rgba(255,95,126,0.12); color: var(--danger); border: 1px solid rgba(255,95,126,0.25); }
+
+  /* ── Video status bar ── */
+  .video-status {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+  .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+  .dot.live { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+
+  /* ── Body ── */
+  .body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── Master toggle ── */
+  .master-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .master-toggle:hover { border-color: var(--muted); }
+  .master-toggle.active { border-color: rgba(127,255,110,0.4); background: rgba(127,255,110,0.04); }
+  .toggle-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+  .toggle-label span { color: var(--text-dim); font-weight: 400; }
+
+  /* Custom toggle switch */
+  .switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; inset: 0;
+    background: var(--muted);
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+  .slider::before {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    left: 3px; top: 3px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.25s;
+  }
+  input:checked + .slider { background: var(--accent); }
+  input:checked + .slider::before { transform: translateX(16px); }
+
+  /* ── Speed control ── */
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .speed-control {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .speed-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .speed-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .speed-value span { font-size: 11px; font-weight: 400; color: var(--text-dim); font-family: 'Space Mono', monospace; }
+
+  .speed-presets { display: flex; gap: 6px; margin-bottom: 10px; }
+  .preset {
+    flex: 1;
+    padding: 4px 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .preset:hover { border-color: var(--muted); color: var(--text); }
+  .preset.active { border-color: var(--accent); color: var(--accent); background: rgba(127,255,110,0.06); }
+
+  .range-wrap { position: relative; }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 3px;
+    background: var(--muted);
+    border-radius: 99px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--glow);
+    cursor: pointer;
+  }
+
+  /* ── Options ── */
+  .options { display: flex; flex-direction: column; gap: 6px; }
+  .option-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: border-color 0.2s;
+  }
+  .option-row:hover { border-color: var(--muted); }
+  .option-row.active { border-color: rgba(79,255,239,0.35); background: rgba(79,255,239,0.03); }
+  .option-text { flex: 1; }
+  .option-name { font-size: 10px; font-weight: 700; letter-spacing: 0.3px; }
+  .option-desc { font-size: 9px; color: var(--text-dim); margin-top: 1px; }
+
+  /* ── Footer ── */
+  .footer {
+    padding: 8px 16px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-note { font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px; }
+  .refresh-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--accent2);
+    background: none;
+    border: 1px solid rgba(79,255,239,0.2);
+    border-radius: 4px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .refresh-btn:hover { background: rgba(79,255,239,0.08); }
+
+  /* ── Disabled overlay ── */
+  .disabled-mask {
+    pointer-events: none;
+    opacity: 0.35;
+    transition: opacity 0.3s;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">⏩</div>
+    <div>
+      <div class="title">Autopilot</div>
+      <div class="subtitle">Coursera Skipper | 0utis</div>
+    </div>
+    <div class="status-pill off" id="statusPill">OFF</div>
+  </div>
+  <div class="video-status">
+    <div class="dot" id="videoDot"></div>
+    <span id="videoInfo">No video detected</span>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- Master toggle -->
+  <label class="master-toggle" id="masterToggle">
+    <div>
+      <div class="toggle-label">AUTOPILOT <span>— master switch</span></div>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="enabledToggle">
+      <span class="slider"></span>
+    </label>
+  </label>
+
+  <!-- Speed -->
+  <div id="controlsBlock">
+    <div class="section-label">Playback Speed</div>
+    <div class="speed-control">
+      <div class="speed-header">
+        <div class="speed-value" id="speedDisplay">2<span>×</span></div>
+        <div style="font-size:9px;color:var(--text-dim);text-align:right">drag or<br>tap preset</div>
+      </div>
+      <div class="speed-presets">
+        <button class="preset" data-speed="1">1×</button>
+        <button class="preset active" data-speed="2">2×</button>
+        <button class="preset" data-speed="4">4×</button>
+        <button class="preset" data-speed="8">8×</button>
+        <button class="preset" data-speed="16">16×</button>
+      </div>
+      <input type="range" id="speedRange" min="0.5" max="16" step="0.5" value="2">
+    </div>
+
+    <!-- Options -->
+    <div class="section-label" style="margin-top:10px">Automation</div>
+    <div class="options">
+      <div class="option-row active" id="row-autoAdvance">
+        <div class="option-text">
+          <div class="option-name">Auto-Advance</div>
+          <div class="option-desc">Click Next when video ends</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="autoAdvanceToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row active" id="row-smartSkip">
+        <div class="option-text">
+          <div class="option-name">Smart Skip ⚡</div>
+          <div class="option-desc">Watch 20 s of video-time (~1-2 s at 16×), then jump to end</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="smartSkipToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row active" id="row-skipAssignments">
+        <div class="option-text">
+          <div class="option-name">Skip Assignments</div>
+          <div class="option-desc">Auto-skip quizzes &amp; graded tasks</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="skipAssignmentsToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row active" id="row-autoDismiss">
+        <div class="option-text">
+          <div class="option-name">Dismiss Overlays</div>
+          <div class="option-desc">Auto-close popups &amp; pause modals</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="autoDismissToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-note" id="footerNote">Navigate to a Coursera course</div>
+  <button class="refresh-btn" id="refreshBtn">↻ refresh</button>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
